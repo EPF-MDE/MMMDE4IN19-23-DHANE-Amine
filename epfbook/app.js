@@ -8,6 +8,7 @@ datafile = "C:/Users/Amine/Desktop/4E_ANNEE/Semestre_2/Web Programming/Web_Progr
 
 app.use(express.json());
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 app.set('views','./views');
 app.set('viewengine','ejs')
@@ -97,4 +98,20 @@ app.get('/students', (req, res) => {
       res.render(path.join(__dirname, "./views/students.ejs"), {students})
     }
   })
+})
+
+app.get('/students/create', (req, res) => {
+  res.render(path.join(__dirname, "./views/create-student.ejs"));
+});
+
+app.post('/students/create', (req,res) => {
+  const csvLine = "\n" + req.body.name + ";" + req.body.school;
+  fs.writeFile(datafile, csvLine, { flag: 'a'}, (err) => {
+    if(err){
+      console.error(err);
+    } else {
+      console.log(req.body);
+    }
+    res.redirect("/students/create?created=1");
+  }); 
 })

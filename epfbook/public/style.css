@@ -2,12 +2,18 @@ html{
     color:black
 }
 head{
-    color:black
+    font-weight: bold;
 }
 body {
     background-color: darkseagreen;
-    align-content: center;
-    max-width: 800px;
     font-weight: bold;
-    color: azure
+    color: azure;
+    text-align: justify;
+    font-size: 20px;
+}
+
+@media (max-width:1000px){
+    p.long-text{
+        display: none;
+    }
 }
