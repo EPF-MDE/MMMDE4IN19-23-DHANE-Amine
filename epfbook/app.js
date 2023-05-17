@@ -29,7 +29,7 @@ const passwordAuthorizer = (username, password, callback) => {
     }
   });
 };
-
+//1234admin, 22072001, coucou
 app.use(express.json());
 app.use(cookieParser())
 app.use(express.static('public'));
@@ -150,7 +150,7 @@ app.post('/api/students/create', (req,res) => {
 });
 
 app.get('/students', (req, res) => {
-  studentsfromcsv(datafile, (err, students) => {
+  studentsfromcsv((err, students) => {
     if (err){
       console.error(err)
     } else {
@@ -184,4 +184,8 @@ app.post('/api/login', (req,res) => {
   };
   res.cookie("auth-token", token, tokenCookie);
   res.send(req.cookies);
+});
+
+app.get('/students/data', (req, res) => {
+  res.render(path.join(__dirname, "./views/students_data.ejs"));
 });
