@@ -29,7 +29,7 @@ const passwordAuthorizer = (username, password, callback) => {
     }
   });
 };
-//1234admin, 22072001, coucou
+//1234admin, 22072001, coucou, buggit
 app.use(express.json());
 app.use(cookieParser())
 app.use(express.static('public'));
