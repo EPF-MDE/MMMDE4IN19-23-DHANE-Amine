@@ -5,8 +5,8 @@ const port =  process.env.PORT || 3000;
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require('bcrypt');
-const datafile = "C:/Users/Amine/Desktop/4E_ANNEE/Semestre_2/Web Programming/Web_Programming0/MMMDE4IN19-23-DHANE-Amine/epfbook/name_school.csv"
-const datafile2 = "C:/Users/Amine/Desktop/4E_ANNEE/Semestre_2/Web Programming/Web_Programming0/MMMDE4IN19-23-DHANE-Amine/epfbook/users.csv"
+const datafile = "./name_school.csv"
+const datafile2 = "./users.csv"
 var cookieParser = require('cookie-parser')
 /**
 * Authorizer function
