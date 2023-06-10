@@ -1,6 +1,13 @@
 # MMMDE4IN19-23-DHANE-Amine
 Repository for Web Programming Project
 
+## Exercise 0 : 
+Has been done using the browser directly with the good id in the URL. Here is a proof :
+
+<br>
+
+![Image](exercise_0.png)
+
 # Project Website
 
 This is a web application built using Express.js. It provides functionality for managing students and includes basic authentication.

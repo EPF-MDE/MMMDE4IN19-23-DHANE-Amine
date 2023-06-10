@@ -1,13 +1,27 @@
 const express = require('express');
-const app = express();
-const basicAuth = require("express-basic-auth");
-const port =  process.env.PORT || 3000;
 const fs = require("fs");
 const path = require("path");
+
+const basicAuth = require("express-basic-auth");
 const bcrypt = require('bcrypt');
+
+const app = express();
+const port =  process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.set('views','./views');
+app.set('viewengine','ejs');
+
+app.use(express.static('public'));
+
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+
 const datafile = "./name_school.csv"
 const datafile2 = "./users.csv"
-var cookieParser = require('cookie-parser')
+
 /**
 * Authorizer function
 * @param {*} username Provided username
@@ -30,10 +44,7 @@ const passwordAuthorizer = (username, password, callback) => {
   });
 };
 //1234admin, 22072001, coucou, buggit
-app.use(express.json());
-app.use(cookieParser())
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+
 app.use(
   basicAuth({
       //users: { admin: "supercretin" },
@@ -43,9 +54,6 @@ app.use(
       challenge: true,
   })
 );
-
-app.set('views','./views');
-app.set('viewengine','ejs')
 
 function usersFromCsv(callback){
   const rowSeparator = "\r\n";
@@ -89,8 +97,9 @@ function studentsfromcsv(callback) {
         if(rows[i]!=""){
           infos = rows[i].split(";")
           let Student = {
-            name : infos[0],
-            school : infos[1]
+            id : infos[0],
+            name : infos[1],
+            school : infos[2]
           };
           students[i-1] = Student
         }
@@ -112,7 +121,7 @@ app.listen(port, () => {
 app.get('/api/students', (req, res) => {
     /*res.send([{ name: "Eric Burel", school: "EPF" }, 
               { name: "HarryPotter", school: "Poudlard"}])*/
-    const rowSeparator = "\n";
+    const rowSeparator = "\r\n";
     const cellSeparator = ",";
     fs.readFile('name_school.csv', 'utf8', (err, data) => {
       if (err) {
@@ -126,8 +135,9 @@ app.get('/api/students', (req, res) => {
           if(rows[i]!=""){
             infos = rows[i].split(";")
             let Student = {
-              name : infos[0],
-              school : infos[1]
+              id : infos[0],
+              name : infos[1],
+              school : infos[2]
             };
             students[i-1] = Student
           }
@@ -163,17 +173,33 @@ app.get('/students/create', (req, res) => {
   res.render(path.join(__dirname, "./views/create-student.ejs"));
 });
 
-app.post('/students/create', (req,res) => {
-  const csvLine = "\n" + req.body.name + ";" + req.body.school;
-  fs.writeFile(datafile, csvLine, { flag: 'a'}, (err) => {
-    if(err){
+app.post('/students/create', (req, res) => {
+  // Read the CSV file to get the number of lines
+  fs.readFile(datafile, 'utf8', (err, data) => {
+    if (err) {
       console.error(err);
-    } else {
-      console.log(req.body);
+      // Handle the error appropriately
+      return res.redirect("/students/create?error=1");
     }
-    res.redirect("/students/create?created=1");
-  }); 
-})
+    // Split the CSV data into an array of lines
+    const lines = data.split("\n");
+    // Calculate the next ID for the new student
+    const nextId = lines.length;
+    // Construct the CSV line for the new student
+    const csvLine = nextId + ";" + req.body.name + ";" + req.body.school;
+    // Append the new student to the CSV file
+    fs.writeFile(datafile, "\n" + csvLine, { flag: 'a' }, (err) => {
+      if (err) {
+        console.error(err);
+        // Handle the error appropriately
+        return res.redirect("/students/create?error=1");
+      }
+      console.log("A new student has been created: ", csvLine);
+      // Redirect to the appropriate page
+      res.redirect("/students/create?created=1");
+    });
+  });
+});
 
 app.post('/api/login', (req,res) => {
   const token = "FOOBAR";
@@ -189,3 +215,72 @@ app.post('/api/login', (req,res) => {
 app.get('/students/data', (req, res) => {
   res.render(path.join(__dirname, "./views/students_data.ejs"));
 });
+
+app.get('/games/checkers', (req, res) => {
+  res.render(path.join(__dirname, "./views/checkers.ejs"));
+});
+
+app.get('/games/tictactoe', (req, res) => {
+  res.render(path.join(__dirname, "./views/new-game-modal.ejs"));
+});
+
+app.get('/contact', (req, res) => {
+  res.render(path.join(__dirname, "./views/contact.ejs"));
+});
+
+app.get('/students/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  studentsfromcsv((err, students) => {
+    if (err){
+      console.error(err)
+    } else {
+      // Check if the requested id is valid
+      if (id >= 0 && id < students.length) {
+        const student = students[id];
+        res.render(path.join(__dirname, "./views/student_details.ejs"), { student });
+      } else {
+        res.status(404).send('Student Not Found');
+      }
+    }
+  });
+});
+
+
+app.post('/students/:id', (req, res) => {
+  const studentId = req.params.id;
+  const updatedName = req.body.name;
+  const updatedSchool = req.body.school;
+
+  // Read the CSV file
+  fs.readFile(datafile, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.redirect("/students"); // Redirect to appropriate error page
+    }
+    // Parse the CSV data
+    const lines = data.split('\n');
+    let updatedData = '';
+    // Update the student with the matching ID
+    for (let i = 0; i < lines.length; i++) {
+      const columns = lines[i].split(';');
+      const id = columns[0];
+      if (id === studentId) {
+        columns[1] = updatedName;
+        columns[2] = updatedSchool;
+      }
+      updatedData += columns.join(';') + '\n';
+    }
+    // Write the updated CSV data back to the file
+    fs.writeFile(datafile, updatedData, 'utf8', (err) => {
+      if (err) {
+        console.error(err);
+        return res.redirect("/students"); // Redirect to appropriate error page
+      }
+      console.log("Student with ID", studentId, "has been updated");
+      res.redirect("/students/" + studentId);
+    });
+  });
+});
+
+
+

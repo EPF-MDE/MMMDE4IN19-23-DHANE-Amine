@@ -1,10 +1,10 @@
-﻿name;school
-Eric Burel;LBKE
-Amine Dhane;EPF
-Harry Potter;Poudlard
-John Doe;EPF
-Adrien;EPF
-Amine;Monkey
-Amine;Monkey
-bonjour;aurevoir
-Amine;Gold
+﻿id;name;school
+0;Eric Burel;LBKEF
+1;Amine Dhane;EPF
+2;Harry Potter;Poudlard
+3;John Doe;EPF
+4;Adrien;EPF
+5;Aomine;Monkey
+6;Amino;Monkey
+8;Minato;Gold
+9;Sasuke Uchiha;Konoha

@@ -1,20 +1,24 @@
 document.addEventListener("DOMContentLoaded", function (event) {
-    // Create a link element
-    var link = document.createElement("AnchorNewStudent");
-    
-    // Set the link's href attribute to "/students/create"
-    link.href = "/students/create";
-    
-    // Set the link's text content
-    link.textContent = "Create a new student";
-    
-    // Append the link to the document body
-    document.body.appendChild(link);
 
     // Select the button using querySelector
-    document.querySelector("#test").addEventListener("click", function(event) {
-    alert("CLICKED!");
+    $(".update-btn").click(function() {
+        var studentId = $(this).data("student-id");
+        var studentName = $(this).closest("tr").find("td:first-child").text();
+        var studentSchool = $(this).data("student-school");
+
+        var form = $("#update-form");
+        form.attr("action", "/students/" + studentId); // Update the form's action
+
+        $("#student-id-input").val(studentId); // Set the student ID in the hidden input field
+        $("#name-input").val(studentName); // Set the name in the input field
+        $("#school-input").val(studentSchool); // Set the school value in the input field
+
+        $("#update-form-modal").modal("show"); // Open the modal
+    });
 });
-});
+
+
+
+
 
 
